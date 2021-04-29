@@ -18,6 +18,7 @@ def lambda_handler(event, context):
     def get_parameters():
         global key_policy
         try:
+            #Retrieve key policy from secret manager parameter store.
             response = ssm.get_parameters(
                 Names=['keypolicy'],WithDecryption=False
             )
@@ -27,17 +28,18 @@ def lambda_handler(event, context):
             print('Retrieved value not valid')
     get_parameters()
     try:
+        #Creating KMS key
         key = kms.create_key(
             Description=Desc,
             KeyUsage=usage
             )
         key_id = key["KeyMetadata"]["KeyId"]
-
+        #Creating key alias
         alias = kms.create_alias(
             AliasName=Alias_Name,
             TargetKeyId=str(key_id)
             )
-        
+        #insert key policy from parameter store.
         keypolicy = kms.put_key_policy(
             KeyId=key_id,
             PolicyName='default',
@@ -45,4 +47,5 @@ def lambda_handler(event, context):
             )
     except:
             print("An error has occured")
+    #send notification to crypto admin
     send_sns()
