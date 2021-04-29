@@ -26,6 +26,7 @@ def lambda_handler(event, context):
                 key_policy = value[0].get('Value')
         except IndexError:
             print('Retrieved value not valid')
+            
     get_parameters()
     try:
         #Creating KMS key
@@ -34,11 +35,13 @@ def lambda_handler(event, context):
             KeyUsage=usage
             )
         key_id = key["KeyMetadata"]["KeyId"]
+        
         #Creating key alias
         alias = kms.create_alias(
             AliasName=Alias_Name,
             TargetKeyId=str(key_id)
             )
+            
         #insert key policy from parameter store.
         keypolicy = kms.put_key_policy(
             KeyId=key_id,
